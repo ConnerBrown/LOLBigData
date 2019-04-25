@@ -13,7 +13,7 @@ import utils
 def main():
     lol = utils.readTable('raw/LeagueofLegends.csv')
     i = 0
-    for item in lol[0]:
+    for item in lol[1]:
         print(i , " " , item)
         i += 1
 
@@ -28,10 +28,13 @@ def main():
     # 41redTopChamp,42goldredTop,43redJungle,44redJungleChamp,45goldredJungle,46redMiddle,
     # 47redMiddleChamp,48goldredMiddle,49redADC,50redADCChamp,51goldredADC,52redSupport,
     # 53redSupportChamp,54goldredSupport,55redBans,56Address
-    indexesToRemove = [0,1,2,3,4,7,10,17,26,29,32,35,37,39, 42,45, 48, 51, 54, 55, 56]
+    indexesToRemove = [0,1,2,3,4,6,7,10,17,26,29,32,35,38,39, 42,45, 48, 51, 54, 55, 56]
     lolColRemoved = utils.removeColumns(lol, indexesToRemove)
-    print(lol[1])
-    print(lolColRemoved[1])
+    print()
+    i=0
+    for item in lolColRemoved[1]:
+        print(i , " " , item)
+        i += 1
 
 
 
