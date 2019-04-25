@@ -2,6 +2,7 @@ import math
 import operator
 import copy
 import random
+import pprint
 from tabulate import tabulate
 
 
@@ -30,6 +31,11 @@ def read_table(filename):
     return table
 
 
+# @Gina's Repo
+def group_by(table, column_index, include_only_column_index=None):
+    # first identify unique values in the column
+    group_names = sorted(list(set(get_column(table, column_index))))
+
     # now, we need a list of subtables
     # each subtable corresponds to a value in group_names
     # parallel arrays
@@ -44,6 +50,7 @@ def read_table(filename):
             groups[index].append(row[include_only_column_index])
 
     return group_names, groups
+
 
 # takes a table and a column index
 # returns a column at index where values are converted to numeric
@@ -84,7 +91,7 @@ def select_attribute(instances, att_indexes, class_index):
     Entropy_list = {}
     for index in att_indexes:
         E_new = 0
-        names, values = groupBy(instances, index)
+        names, values = group_by(instances, index)
         for val in values:
             ratios = {}
             total = 0
@@ -119,6 +126,7 @@ def handle_clash(instances, class_index):
 
 def tdidt(instances, att_indexes, att_domains, class_index):
     if check_all_same_class(instances, class_index):
+        print("Returning Leaf, all same class")
         return ["Leaf", instances[0][class_index]]
     if att_indexes == []:
         return handle_clash(instances, class_index)
@@ -126,6 +134,8 @@ def tdidt(instances, att_indexes, att_domains, class_index):
     new_indexes = att_indexes[:]
     new_indexes.remove(index)
     if check_all_same_att(instances, index):
+        print('Calling 1:')
+        print('with attributes: ', new_indexes)
         return tdidt(instances, new_indexes, att_domains, class_index)
     else:
         tree = ["Attribute", index]
@@ -133,6 +143,10 @@ def tdidt(instances, att_indexes, att_domains, class_index):
         for val in partitions:
             if (partitions[val] == []):
                 return handle_clash(instances, class_index)
+            print('Calling 2:')
+            pprint.pprint(tree)
+            print('with attributes: ', new_indexes)
+            print('with partition: ', val)
             tree.append(["Value", val, tdidt(partitions[val], new_indexes, att_domains, class_index)])
         return tree
 
@@ -146,8 +160,23 @@ def classify_tdidt(tree, instance):
         return classify_tdidt(tree[i][2], instance)
 
 def main():
-    cancer = read_table('wisconsin.txt')
-    convert_to_numeric(cancer)
+    titanic = read_table('titanic.txt')
+    convert_to_numeric(titanic)
+    attr_indexes = [0,1,2]
+    att_domains = {0: ["crew", "first", "second", "third"], 
+                1: ["adult", "child"],
+                2: ["male", "female"]}
+    class_index = 3
+    random.shuffle(titanic)
+    test = titanic[:int(len(titanic)/3)]
+    train = titanic[int(len(titanic)/3):]
+    tree = tdidt(train, attr_indexes, att_domains, class_index)
+    print()
+    print()
+    print()
+    print()
+    pprint.pprint(tree)
+
 
 if __name__ == "__main__":
     main()
