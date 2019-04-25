@@ -10,12 +10,24 @@ def removeColumns(table, indexes):
     new_table = []
     row = []
     for item in table:
-        for index in range(len(table[0])):
+        for index in range(len(item)):
             if index not in  indexes:
                 row.append(item[index])
         new_table.append(row)
         row = []
     return new_table
+
+
+def superStrip(table):
+    for i in range(len(table)):
+        for j in range(len(table[i])):
+            if type(table[i][j]) == list:
+                for k in range(len(table[i][j])):
+                    table[i][j][k].strip(' ')
+                    table[i][j][k].strip('[')
+                    table[i][j][k].strip(']')
+                    table[i][j][k].strip('"')
+                    table[i][j][k].strip("'")
 
 
 #reads a csv file of the given name into a list
@@ -25,9 +37,28 @@ def readTable(filename):
     myFile = open(filename, 'r')
     #read each line in file and append into the table
     lines = myFile.read().split('\n')
+    temp = []
+    row = []
+    isList = False
     for line in lines:
         values = line.split(',')
-        table.append(values)
+        for value in values:
+            if isList:
+
+                temp.append(value)
+            if '"[' in value and isList == False:
+                temp.append(value)
+                isList = True
+            if not isList:
+                row.append(value)
+            if isList and ']"' in value[-2:]:
+                temp.append(value)
+                isList = False
+                row.append(temp)
+                temp = []
+        table.append(row)
+        row = []
+
     myFile.close()
     return table
 	
