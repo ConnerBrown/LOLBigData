@@ -3,7 +3,6 @@ import operator
 import copy
 import random
 import pprint
-from tabulate import tabulate
 
 
 #takes a table of values and turns them into floats
@@ -122,20 +121,20 @@ def handle_clash(instances, class_index):
             votes[instance[class_index]] += 1
     # Referenced from https://stackoverflow.com/questions/613183/how-do-i-sort-a-dictionary-by-value
     sorted_x = sorted(votes.items(), reverse=True, key=operator.itemgetter(1))
-    return ["Leaf", sorted_x[0][0]]
+    return ["Leaf", sorted_x[0][0], 0, 0, 0]
 
 def tdidt(instances, att_indexes, att_domains, class_index):
     if check_all_same_class(instances, class_index):
-        print("Returning Leaf, all same class")
-        return ["Leaf", instances[0][class_index]]
+        #print("Returning Leaf, all same class")
+        return ["Leaf", instances[0][class_index], 0, 0, 0]
     if att_indexes == []:
         return handle_clash(instances, class_index)
     index = select_attribute(instances, att_indexes, class_index)
     new_indexes = att_indexes[:]
     new_indexes.remove(index)
     if check_all_same_att(instances, index):
-        print('Calling 1:')
-        print('with attributes: ', new_indexes)
+        #print('Calling 1:')
+        #print('with attributes: ', new_indexes)
         return tdidt(instances, new_indexes, att_domains, class_index)
     else:
         tree = ["Attribute", index]
@@ -143,10 +142,10 @@ def tdidt(instances, att_indexes, att_domains, class_index):
         for val in partitions:
             if (partitions[val] == []):
                 return handle_clash(instances, class_index)
-            print('Calling 2:')
-            pprint.pprint(tree)
-            print('with attributes: ', new_indexes)
-            print('with partition: ', val)
+            #print('Calling 2:')
+            #pprint.pprint(tree)
+            #print('with attributes: ', new_indexes)
+            #print('with partition: ', val)
             tree.append(["Value", val, tdidt(partitions[val], new_indexes, att_domains, class_index)])
         return tree
 
@@ -158,6 +157,58 @@ def classify_tdidt(tree, instance):
         while (instance[tree[1]] != tree[i][1]):
             i += 1
         return classify_tdidt(tree[i][2], instance)
+
+def calculate_error(f, N, z):
+    root = ((f / N) - ((f**2)/N) + ((z**2)/(4*(N**2))))**(1/2)
+    top = (f + ((z**2)/(2*N)) + (z * root))
+    bottom = 1 + ((z**2)/N)
+    e = top / bottom
+    return e
+
+def update_count(tree, instance, class_index):
+    if tree[0] == 'Leaf':
+        if tree[1] == instance[class_index]:
+            tree[2] += 1
+        else:
+            tree[3] += 1
+    else:
+        i = 2
+        while (instance[tree[1]] != tree[i][1]):
+            i += 1
+        return update_count(tree[i][2], instance, class_index)
+
+
+def prune(tree):
+    if tree[0] == 'Leaf':
+        return
+    else:
+        successes, fails = get_stats(tree)
+        
+
+def get_stats(tree):
+    if tree[0] == 'Leaf':
+        return tree[2], tree[3]
+    else:
+        successes = 0
+        fails = 0
+        for branch in tree[2:]:
+            success_n, fail_n = get_stats(branch[2])
+            successes += success_n
+            fails += fail_n
+        return successes, fails
+
+def update_errors(tree, z):
+    if tree[0] == 'Leaf':
+        N = tree[2] + tree[3]
+        f = tree[2] / N
+        e = calculate_error(f, N, z)
+        tree[4] = e
+    else:
+        for branch in tree[2:]:
+            update_errors(branch[2], z)
+
+#def get_weighted_error(tree):
+     
 
 def main():
     titanic = read_table('titanic.txt')
@@ -177,6 +228,27 @@ def main():
     print()
     pprint.pprint(tree)
 
+def test():
+    titanic = read_table('titanic.txt')
+    convert_to_numeric(titanic)
+    attr_indexes = [0,1,2]
+    att_domains = {0: ["crew", "first", "second", "third"], 
+                1: ["adult", "child"],
+                2: ["male", "female"]}
+    class_index = 3
+    random.shuffle(titanic)
+    test = titanic[:int(len(titanic)/3)]
+    train = titanic[int(len(titanic)/3):]
+    tree = tdidt(train, attr_indexes, att_domains, class_index)
+
+    for instance in train:
+        update_count(tree, instance, class_index)
+    #pprint.pprint(tree)
+    s,f = get_stats(tree)
+    print(s)
+    print(f)
+    update_errors(tree, 0.69)
+    pprint.pprint(tree)
 
 if __name__ == "__main__":
-    main()
+    test()

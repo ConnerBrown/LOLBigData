@@ -1,4 +1,3 @@
-class,age,sex,survived
 crew,adult,female,yes
 first,adult,male,no
 first,adult,male,no

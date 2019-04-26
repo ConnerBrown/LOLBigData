@@ -24,6 +24,7 @@ for index, row in data.iterrows():
     line.append(row['redADCChamp'])
     line.append(row['redSupportChamp'])
     length = int(row['gamelength'])
+    line.append(length)
     gold = ast.literal_eval(row['golddiff'])
     b_kills = ast.literal_eval(row['bKills'])
     b_towers = ast.literal_eval(row['rTowers'])
@@ -42,32 +43,32 @@ for index, row in data.iterrows():
         minute.append(gold[i])
         b_kill_total = 0
         for kill in b_kills:
-            if float(kill[0]) < i:
+            if float(kill[0]) <= i:
                 b_kill_total += 1
         minute.append(b_kill_total)
         b_tower_total = 0
         for tower in b_towers:
-            if float(tower[0]) < i:
+            if float(tower[0]) <= i:
                 b_tower_total += 1
         minute.append(b_tower_total)
         b_inhib_total = 0
         for inhib in b_inhibs:
-            if float(inhib[0]) < i:
+            if float(inhib[0]) <= i:
                 b_inhib_total += 1
         minute.append(b_inhib_total)
         b_dragon_total = 0
         for dragon in b_dragons:
-            if float(tower[0]) < i:
+            if float(tower[0]) <= i:
                 b_tower_total += 1
         minute.append(b_tower_total)
         b_tower_total = 0
         for tower in b_towers:
-            if float(tower[0]) < i:
+            if float(tower[0]) <= i:
                 b_tower_total += 1
         minute.append(b_tower_total)
         b_tower_total = 0
         for tower in b_towers:
-            if float(tower[0]) < i:
+            if float(tower[0]) <= i:
                 b_tower_total += 1
         minute.append(b_tower_total)
     data_cleaned.append(line)
