@@ -178,12 +178,71 @@ def update_count(tree, instance, class_index):
         return update_count(tree[i][2], instance, class_index)
 
 
-def prune(tree):
-    if tree[0] == 'Leaf':
-        return
+def has_all_leaves(node):
+    for branch in node[2:]:
+        if branch[2][0] != 'Leaf':
+            return False
+    return True
+
+def same_rules(node):
+    rules = set()
+    for branch in node[2:]:
+        rules.add(branch[2][1])
+    if len(rules) == 1:
+        return True
     else:
-        successes, fails = get_stats(tree)
-        
+        return False
+
+def prune(tree, confidence):
+    if tree[0] == 'Leaf':
+        return False, tree
+    else:
+        all_leaves = has_all_leaves(tree)
+        if all_leaves:
+            successes, fails = get_stats(tree)
+            e_node = calculate_error((fails / (successes + fails)), (successes + fails), confidence)
+            same_rule = same_rules(tree)
+            if same_rule:
+                rule = tree[2][2][1]
+                tree = ['Leaf', rule, successes, fails, e_node]
+                return True, tree
+            else:
+                N_total = 0
+                e_total = 0
+                for leaf in tree[2:]:
+                    N_total += leaf[2][2] + leaf[2][3]
+                    e_total += (leaf[2][4]) * (leaf[2][2] + leaf[2][3])
+                e_average = e_total / N_total
+                if e_node < e_average:
+                    class0 = tree[2][2][1]
+                    class1 = ""
+                    class0_votes = 0
+                    class1_votes = 0
+                    for leaf in tree[2:]:
+                        if leaf[2][1] == class0:
+                            class0_votes += leaf[2][2]
+                            class1_votes += leaf[2][3]
+                        else:
+                            class1 = leaf[2][1]
+                            class1_votes += leaf[2][2]
+                            class0_votes += leaf[2][3]
+                    if class0_votes > class1_votes:
+                        e_actual = calculate_error((class1_votes/(class0_votes + class1_votes)), (class0_votes + class1_votes), confidence)
+                        tree = ['Leaf', class0, class0_votes, class1_votes, e_actual]
+                    else:
+                        e_actual = calculate_error((class0_votes/(class0_votes + class1_votes)), (class0_votes + class1_votes), confidence)
+                        tree = ['Leaf', class1, class1_votes, class0_votes, e_actual]
+                    return True, tree
+                else:
+                    return False, tree
+        else:
+            pruned = False
+            for i in range(len(tree[2:])):
+                pruned_n, tree[i+2][2] = prune(tree[i+2][2], confidence)
+                pruned = pruned or pruned_n
+            if pruned:
+                return False, tree
+                
 
 def get_stats(tree):
     if tree[0] == 'Leaf':
@@ -200,7 +259,7 @@ def get_stats(tree):
 def update_errors(tree, z):
     if tree[0] == 'Leaf':
         N = tree[2] + tree[3]
-        f = tree[2] / N
+        f = tree[3] / N
         e = calculate_error(f, N, z)
         tree[4] = e
     else:
@@ -227,6 +286,7 @@ def main():
     print()
     print()
     pprint.pprint(tree)
+    
 
 def test():
     titanic = read_table('titanic.txt')
@@ -248,6 +308,14 @@ def test():
     print(s)
     print(f)
     update_errors(tree, 0.69)
+    pprint.pprint(tree)
+    print()
+    print()
+    print()
+    prune(tree, 0.69)
+    print("PRUNED")
+    print("--------------")
+    print()
     pprint.pprint(tree)
 
 if __name__ == "__main__":
