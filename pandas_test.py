@@ -10,8 +10,12 @@ data = data[data.Year != 2015]
 
 data_cleaned = []
 
+gameID = 0
+
 for index, row in data.iterrows():
+    gameID += 1
     line = []
+    line.append(gameID)
     length = int(row['gamelength'])
     line.append(length)
     line.append(int(row['Year']))
@@ -116,7 +120,7 @@ for index, row in data.iterrows():
 
         data_cleaned.append(minute)
 
-headers = ['Minute', 'gamelength', 'Year', 'bResult', 'blueTopChamp', 'blueJungleChamp', 'blueMiddleChamp', 'blueADCChamp', 'blueSupportChamp', 'redTopChamp', 'redJungleChamp', 'redMiddleChamp', 'redADCChamp', 'redSupportChamp', 'golddiff', 'bKills', 'bTowers', 'bInhibs', 'bDragons', 'bBarons', 'bHeralds', 'rKills', 'rTowers', 'rInhibs', 'rDragons', 'rBarons', 'rHeralds']
+headers = ['Minute', 'GameID', 'gamelength', 'Year', 'bResult', 'blueTopChamp', 'blueJungleChamp', 'blueMiddleChamp', 'blueADCChamp', 'blueSupportChamp', 'redTopChamp', 'redJungleChamp', 'redMiddleChamp', 'redADCChamp', 'redSupportChamp', 'golddiff', 'bKills', 'bTowers', 'bInhibs', 'bDragons', 'bBarons', 'bHeralds', 'rKills', 'rTowers', 'rInhibs', 'rDragons', 'rBarons', 'rHeralds']
 
 df_clean = pd.DataFrame(data_cleaned, columns=headers)
 df_clean.to_csv("LoL_clean.csv")
