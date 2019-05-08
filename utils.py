@@ -5,6 +5,19 @@ import tabulate
 import random
 
 
+#normailize columns at indexes
+def normalizeColumns(table, indexes):
+    colMaxes = []
+    colMins = []
+    for index in indexes:
+        col = getColumn(table, index)
+        colMaxes.append(max(col))
+        colMins.append(min(col))
+    for i in range(len(table)):
+        for j in range(len(indexes)):
+            table[i][indexes[j]] = (table[i][indexes[j]]-colMins[j]) / ((colMaxes[j]- colMins[j])*1.0)
+
+
 #removes columns from a table
 def removeColumns(table, indexes):
     new_table = []
@@ -165,7 +178,7 @@ def stratifiedCrossValidationBins(K, table, classIndex):
     for i in range(len(values)):
         for j in range(len(values[i])):
             bins[bindex].append(values[i][j])
-            bindex = (bindex + 1)%10
+            bindex = (bindex + 1)%K
 
     return bins 
 
