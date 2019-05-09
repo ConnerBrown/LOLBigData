@@ -306,7 +306,7 @@ def main():
     
     print('     Instances: ', len(table))
 
-    att_indexes = [ 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+    att_indexes = [1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
                     26, 27, 28]
     domains = {
                 1: [x+1 for x in range(76)],
@@ -326,8 +326,8 @@ def main():
                 }
 
     print('Generating Random Forest this will take some time')
-    print('N = ', 50, " M = ", 5, " F = ", 3)
-    accuracies = random_forest(50, 5, 3, table, att_indexes, domains, 5)
+    print('N = ', 30, " M = ", 7, " F = ", 2)
+    accuracies = random_forest(30, 7, 2, table, att_indexes, domains, 5)
     plot(accuracies)
 
     
