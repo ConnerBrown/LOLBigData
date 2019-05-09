@@ -4,7 +4,14 @@ import ast
 
 data = pd.read_csv("raw/LeagueofLegends.csv")
 
-data = data[["Year", "bResult", "gamelength", "golddiff", "bKills", "bTowers", "bInhibs", "bDragons", "bBarons", "bHeralds", "rKills", "rTowers", "rInhibs", "rDragons", "rBarons", "rHeralds", "blueTopChamp", "blueJungleChamp", "blueMiddleChamp", "blueADCChamp", "blueSupportChamp", "redTopChamp", "redJungleChamp", "redMiddleChamp", "redADCChamp", "redSupportChamp"]]
+data = data[["Year", "bResult", 
+"gamelength", "golddiff", "bKills", "bTowers", 
+"bInhibs", "bDragons", "bBarons", "bHeralds", "rKills", 
+"rTowers", "rInhibs", "rDragons", "rBarons", "rHeralds", 
+"blueTopChamp", "blueJungleChamp", "blueMiddleChamp", 
+"blueADCChamp", "blueSupportChamp", "redTopChamp", "redJungleChamp", 
+"redMiddleChamp", "redADCChamp", "redSupportChamp"]]
+
 data = data[data.Year != 2014]
 data = data[data.Year != 2015]
 
@@ -130,7 +137,10 @@ for index, row in data.iterrows():
 
         data_cleaned.append(minute)
 
-headers = ['Minute', 'GameID', 'gamelength', 'Year', 'bResult', 'blueTopChamp', 'blueJungleChamp', 'blueMiddleChamp', 'blueADCChamp', 'blueSupportChamp', 'redTopChamp', 'redJungleChamp', 'redMiddleChamp', 'redADCChamp', 'redSupportChamp', 'golddiff', 'bKills', 'bTowers', 'bInhibs', 'bDragons', 'bBarons', 'bHeralds', 'rKills', 'rTowers', 'rInhibs', 'rDragons', 'rBarons', 'rHeralds']
+headers = ['Minute', 'GameID', 'gamelength', 'Year', 'bResult', 'blueTopChamp', 'blueJungleChamp',
+ 'blueMiddleChamp', 'blueADCChamp', 'blueSupportChamp', 'redTopChamp', 'redJungleChamp', 'redMiddleChamp',
+  'redADCChamp', 'redSupportChamp', 'golddiff', 'bKills', 'bTowers', 'bInhibs', 'bDragons', 'bBarons', 
+  'bHeralds', 'rKills', 'rTowers', 'rInhibs', 'rDragons', 'rBarons', 'rHeralds']
 
 df_clean = pd.DataFrame(data_cleaned, columns=headers)
 df_clean.to_csv("LoL_clean.csv")

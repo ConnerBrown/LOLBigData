@@ -48,8 +48,8 @@ def KNN(training, K, testing, indexes, classIndex):
     
     return predictions
 
-
-def plot(accuracies):
+#plots accuracies by minute
+def plot(accuracies, figname):
     minute = utils.getColumn(accuracies, 0)
     accuracy = utils.getColumn(accuracies, 1)
     plt.figure()
@@ -57,7 +57,7 @@ def plot(accuracies):
     plt.title("KNN Accuracy Vs. Time")
     plt.xlabel('Minute')
     plt.ylabel('Accuracy')
-    plt.show()
+    plt.savefig(figname)
 
 def main():
     print('reading table')
@@ -74,7 +74,7 @@ def main():
     plt.title("Minute Histogram")
     plt.xlabel("Minute")
     plt.ylabel("Games")
-    plt.show()
+    plt.savefig("minutes_histogram.png")
     print('Normalizing gold diff and minute')
     utils.normalizeColumns(table, [1, 16])
     print('Shuffling and reducing')
@@ -116,7 +116,7 @@ def main():
     print("Overall Accurracy: ", overall_correct/total_instance)
     print("Instances: ", total_instance)
     print("Correct: ", overall_correct)
-    plot(accuracies)
+    #plot(accuracies, "KNN_accuracies.png")
 
 if __name__ == "__main__":
     main()

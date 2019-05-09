@@ -3,8 +3,9 @@ import math
 import operator
 import random
 import pprint
-import matplotlib.pyplot as plt
 
+#classifies and instance given a tree and
+# an instance
 def classify_tdidt(tree, instance):
     if tree[0] == 'Leaf':
         return tree[1]
@@ -14,6 +15,7 @@ def classify_tdidt(tree, instance):
             i += 1
         return classify_tdidt(tree[i][2], instance)
 
+#Calculate error for pruning
 def calculate_error(f, N, z):
     root = ((f / N) - ((f**2)/N) + ((z**2)/(4*(N**2))))**(1/2)
     top = (f + ((z**2)/(2*N)) + (z * root))
@@ -21,6 +23,7 @@ def calculate_error(f, N, z):
     e = top / bottom
     return e
 
+#Count the success/fails for each node in the tree
 def update_count(tree, instance, class_index):
     if tree[0] == 'Leaf':
         if tree[1] == instance[class_index]:
@@ -33,14 +36,15 @@ def update_count(tree, instance, class_index):
             i += 1
         return update_count(tree[i][2], instance, class_index)
 
-
+#checks if all nodes children are leaves
 def has_all_leaves(node):
     for branch in node[2:]:
         if branch[2][0] != 'Leaf':
             return False
     return True
 
-
+#checks if the node's children 
+# produce identical rules
 def same_rules(node):
     rules = set()
     for branch in node[2:]:
@@ -50,7 +54,7 @@ def same_rules(node):
     else:
         return False
 
-
+#Cost complexity post pruning for TDIDT
 def prune(tree, confidence):
     if tree[0] == 'Leaf':
         return False, tree
@@ -106,7 +110,7 @@ def prune(tree, confidence):
             if pruned:
                 return False, tree
                 
-
+#returns the success fails of a tree
 def get_stats(tree):
     if tree[0] == 'Leaf':
         return tree[2], tree[3]
@@ -119,7 +123,8 @@ def get_stats(tree):
             fails += fail_n
         return successes, fails
 
-
+#Updates the errors of each node
+# in a TDIDT tree for pruning
 def update_errors(tree, z):
     if tree[0] == 'Leaf':
         N = tree[2] + tree[3]
@@ -130,59 +135,8 @@ def update_errors(tree, z):
         for branch in tree[2:]:
             update_errors(branch[2], z)
 
-def partition_instances(instances, att_index, att_domain):
-    # this is a group by att_domain, not by att_values in instances
-    partition = {}
-    for att_value in att_domain:
-        subinstances = []
-        for instance in instances:
-            # check if this instance has att_value at att_index
-            if instance[att_index] == att_value:
-                subinstances.append(instance)
-        partition[att_value] = subinstances
-    return partition
 
-
-def check_all_same_att(instances, index):
-    base = instances[0][index]
-    for elem in instances:
-        if elem[index] != base:
-            return False
-    return True
-
-def check_all_same_class(instances, class_index):
-    base = instances[0][class_index]
-    for elem in instances:
-        if elem[class_index] != base:
-            return False
-    return True
-
-def select_attribute(instances, att_indexes, class_index):
-    Entropy_list = {}
-    for index in att_indexes:
-        E_new = 0
-        names, values = utils.groupBy(instances, index)
-        for val in values:
-            ratios = {}
-            total = 0
-            for instance in val:
-                if instance[class_index] not in ratios:
-                    ratios[instance[class_index]] = 1
-                else:
-                    ratios[instance[class_index]] += 1
-                total += 1
-            E = 0
-            for ratio in ratios:
-                E += (ratios[ratio] / total) * math.log((ratios[ratio] / total), 2)
-            E_new += (total / len(instances)) * -E
-        Entropy_list[index] = E_new
-
-    min_i = att_indexes[0]
-    for index in att_indexes:
-        if Entropy_list[index] < Entropy_list[min_i]:
-            min_i = index
-    return min_i
-
+#handle TDIDT case 2/3 clashes
 def handle_clash(instances, class_index):
     votes = {}
     for instance in instances:
@@ -194,55 +148,34 @@ def handle_clash(instances, class_index):
     sorted_x = sorted(votes.items(), reverse=True, key=operator.itemgetter(1))
     return ["Leaf", sorted_x[0][0], 0, 0, 0]
 
-#Converts raw values into categories
-def discrimatize(table, column_index, cut_offs):
-    for i in range(len(table)):
-        for j in range(len(cut_offs)):
-            if(j<(len(cut_offs)-1)):
-                if(table[i][column_index]<=cut_offs[j]):
-                    table[i][column_index] = j+1
-                    break
-            else:
-                table[i][column_index] = j+1
-    return table
 
-
-
+#Constructs a TDIDT classification tree
 def tdidt(instances, att_indexes, att_domains, class_index):
-    if check_all_same_class(instances, class_index):
+    if utils.check_all_same_class(instances, class_index):
         return ["Leaf", instances[0][class_index], 0, 0, 0]
     if att_indexes == []:
         return handle_clash(instances, class_index)
-    index = select_attribute(instances, att_indexes, class_index)
+    index = utils.select_attribute(instances, att_indexes, class_index)
     new_indexes = att_indexes[:]
     new_indexes.remove(index)
-    if check_all_same_att(instances, index):
+    if utils.check_all_same_att(instances, index):
         return tdidt(instances, new_indexes, att_domains, class_index)
     else:
         tree = ["Attribute", index]
-        partitions = partition_instances(instances, index, att_domains[index])
+        partitions = utils.partition_instances(instances, index, att_domains[index])
         for val in partitions:
             if (partitions[val] == []):
                 return handle_clash(instances, class_index)
             tree.append(["Value", val, tdidt(partitions[val], new_indexes, att_domains, class_index)])
         return tree
 
+# trains and tests a tdidt tree given dataset information
+# returns predictions
 def train_test_tree(tree, train, test, att_indexes, att_domains, class_index):
     predictions = []
     for item in test:
         predictions.append(classify_tdidt(tree, item))
     return predictions
-
-def plot(accuracies):
-    minute = utils.getColumn(accuracies, 0)
-    accuracy = utils.getColumn(accuracies, 1)
-    plt.figure()
-    plt.scatter(minute, accuracy)
-    plt.title("TDIDT Accuracy Vs. Time")
-    plt.xlabel('Minute')
-    plt.ylabel('Accuracy')
-    plt.show()
-
 
 
 def main():
@@ -254,22 +187,22 @@ def main():
     utils.convertToNumeric(table)
     print('Reducing Range of Several Attributes')
     cut_offs = [-8000, -6000, -4000, -2000, -1000, 0, 1000, 2000, 4000, 6000, 8000]
-    table = discrimatize(table, 16, cut_offs)
+    table = utils.discrimatize(table, 16, cut_offs)
     cut_offs = [10, 20, 30, 40, 50, 60, 75]
-    table = discrimatize(table, 17, cut_offs)
-    table = discrimatize(table, 23, cut_offs)
+    table = utils.discrimatize(table, 17, cut_offs)
+    table = utils.discrimatize(table, 23, cut_offs)
     cut_offs = [3, 6, 9, 12, 15, 18]
-    table = discrimatize(table, 20, cut_offs)
-    table = discrimatize(table, 26, cut_offs)
+    table = utils.discrimatize(table, 20, cut_offs)
+    table = utils.discrimatize(table, 26, cut_offs)
     cut_offs = [0, 3, 6, 10, 15]
-    table = discrimatize(table, 19, cut_offs)
-    table = discrimatize(table, 25, cut_offs)
+    table = utils.discrimatize(table, 19, cut_offs)
+    table = utils.discrimatize(table, 25, cut_offs)
     cut_offs = [0, 3, 6, 9, 12]
-    table = discrimatize(table, 18, cut_offs)
-    table = discrimatize(table, 24, cut_offs)
+    table = utils.discrimatize(table, 18, cut_offs)
+    table = utils.discrimatize(table, 24, cut_offs)
     cut_offs = [0, 1, 2]
-    table = discrimatize(table, 21, cut_offs)
-    table = discrimatize(table, 27, cut_offs)
+    table = utils.discrimatize(table, 21, cut_offs)
+    table = utils.discrimatize(table, 27, cut_offs)
     print('Shuffling and Reducing')
     random.shuffle(table)
     table = table[0:int(len(table)/1.5)]
@@ -335,7 +268,7 @@ def main():
     print("Instances: ", total_instance)
     print("Correct: ", overall_correct)
 
-    plot(accuracies)
+    #utils.plot(accuracies, "TDIDT_no_prune")
 
     print('Pruning tree')
     print('     calculating stats')
@@ -382,7 +315,7 @@ def main():
     print("Instances: ", total_instance)
     print("Correct: ", overall_correct)
 
-    plot(accuracies)
+    #utils.plot(accuracies, "TDIDT_pruned")
 
 if __name__ == "__main__":
     main()
