@@ -61,35 +61,28 @@ def main():
     utils.normalizeColumns(table, [1, 16])
     print('Shuffling and reducing')
     random.shuffle(table)
+        #use 1/15 the total data set
     table = table[0:int(len(table)/15)]
     print('     Instances: ', len(table))
     print('Stratisfying')
-    bins = utils.stratifiedCrossValidationBins(5, table, 5)
+    bins = utils.stratifiedCrossValidationBins(5, table, 1)
     train1, test1 = utils.binsToSets(bins, 0)
-    train2, test2 = utils.binsToSets(bins, 1)
-    '''
-    print('Preforming knn on train1')
-    predictions = KNN(train1, 5, test1, [1, 16], 5)
-    print('Computing accuracy')
-    correct = 0
-    for i in range(len(predictions)):
-        if predictions[i] == test1[i][5]:
-            correct += 1
-    print("     accurracy: ", correct/len(predictions))
-    '''
     
-    print("Testing by the minute")
+    print("Testing by the minute, this will take some time")
     print("     grouping test set")
     minutes, groups = utils.groupBy(test1, 1)
-    
+    print("     running classifier")
     accuracies = []
+    overall_correct = 0
+    total_instance = 0
     for count in range(len(minutes)):
-        print('-')
         predictions = KNN(train1, 5, groups[count], [1, 16], 5)
         correct = 0
+        total_instance += len(predictions)
         for i in range(len(predictions)):
             if predictions[i] == groups[count][i][5]:
                 correct += 1
+                overall_correct += 1
         accuracies.append([minutes[count], correct/len(predictions), correct, len(predictions)])
 
     print("Sorting accuracies")
@@ -102,7 +95,9 @@ def main():
         print('     Instances: ', item[3])
         print()
         count+=1
-    
+    print("Overll Accurracy: ", overall_correct/total_instance)
+    print("Instances: ", total_instance)
+    print("Correct: ", overall_correct)
 
 if __name__ == "__main__":
     main()
