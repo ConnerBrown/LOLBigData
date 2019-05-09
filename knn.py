@@ -2,7 +2,7 @@ import utils
 import math
 import operator
 import random
-
+import matplotlib.pyplot as plt
             
 #compute Distance
 def KNNDistance(val1, val2, indexes):
@@ -49,6 +49,16 @@ def KNN(training, K, testing, indexes, classIndex):
     return predictions
 
 
+def plot(accuracies):
+    minute = utils.getColumn(accuracies, 0)
+    accuracy = utils.getColumn(accuracies, 1)
+    plt.figure()
+    plt.scatter(minute, accuracy)
+    plt.title("KNN Accuracy Vs. Time")
+    plt.xlabel('Minute')
+    plt.ylabel('Accuracy')
+    plt.show()
+
 def main():
     print('reading table')
     table = utils.readTable("LoL_clean_manual.csv")
@@ -89,15 +99,16 @@ def main():
     accuracies.sort(key=lambda x: x[0])
     count = 0
     for item in accuracies:
-        print('Minute: ', count)
+        print('Minute: ', round(item[0], 3))
         print('     Accuracy: ', item[1])
         print('     Correct: ', item[2])
         print('     Instances: ', item[3])
         print()
         count+=1
-    print("Overll Accurracy: ", overall_correct/total_instance)
+    print("Overall Accurracy: ", overall_correct/total_instance)
     print("Instances: ", total_instance)
     print("Correct: ", overall_correct)
+    plot(accuracies)
 
 if __name__ == "__main__":
     main()

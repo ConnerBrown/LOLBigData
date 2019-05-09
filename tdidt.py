@@ -3,6 +3,7 @@ import math
 import operator
 import random
 import pprint
+import matplotlib.pyplot as plt
 
 def classify_tdidt(tree, instance):
     if tree[0] == 'Leaf':
@@ -232,6 +233,16 @@ def train_test_tree(tree, train, test, att_indexes, att_domains, class_index):
         predictions.append(classify_tdidt(tree, item))
     return predictions
 
+def plot(accuracies):
+    minute = utils.getColumn(accuracies, 0)
+    accuracy = utils.getColumn(accuracies, 1)
+    plt.figure()
+    plt.scatter(minute, accuracy)
+    plt.title("TDIDT Accuracy Vs. Time")
+    plt.xlabel('Minute')
+    plt.ylabel('Accuracy')
+    plt.show()
+
 
 
 def main():
@@ -324,15 +335,16 @@ def main():
     print("Instances: ", total_instance)
     print("Correct: ", overall_correct)
 
+    plot(accuracies)
 
     print('Pruning tree')
     print('     calculating stats')
     for instance in train1:
         update_count(tree, instance, 5)
     
-    update_errors(tree, 0.8)
+    update_errors(tree, 0.7)
     print("     Pruning")
-    prune(tree, 0.8) 
+    prune(tree, 0.7) 
     print("Pruned Tree: ")
     pprint.pprint(tree)
 
@@ -369,6 +381,8 @@ def main():
     print("Overll Accurracy: ", overall_correct/total_instance)
     print("Instances: ", total_instance)
     print("Correct: ", overall_correct)
+
+    plot(accuracies)
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,7 @@ import pprint
 import random
 import utils
 import operator
+import matplotlib.pyplot as plt
 
 
 def partition_instances(instances, att_index, att_domain):
@@ -261,6 +262,15 @@ def random_forest(N, M, F, table, attr_indexes, attr_domains, class_index):
 
     return accuracies
     
+def plot(accuracies):
+    minute = utils.getColumn(accuracies, 0)
+    accuracy = utils.getColumn(accuracies, 1)
+    plt.figure()
+    plt.scatter(minute, accuracy)
+    plt.title("Random Forest Accuracy Vs. Time")
+    plt.xlabel('Minute')
+    plt.ylabel('Accuracy')
+    plt.show()
 
 
 def main():
@@ -317,7 +327,8 @@ def main():
 
     print('Generating Random Forest this will take some time')
     print('N = ', 50, " M = ", 5, " F = ", 3)
-    random_forest(50, 5, 3, table, att_indexes, domains, 5)
+    accuracies = random_forest(50, 5, 3, table, att_indexes, domains, 5)
+    plot(accuracies)
 
     
 
