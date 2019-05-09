@@ -3,6 +3,7 @@ import math
 import copy
 import tabulate
 import random
+import matplotlib.pyplot as plt
 
 
 #normailize columns at indexes
@@ -16,31 +17,6 @@ def normalizeColumns(table, indexes):
     for i in range(len(table)):
         for j in range(len(indexes)):
             table[i][indexes[j]] = (table[i][indexes[j]]-colMins[j]) / ((colMaxes[j]- colMins[j])*1.0)
-
-
-#removes columns from a table
-def removeColumns(table, indexes):
-    new_table = []
-    row = []
-    for item in table:
-        for index in range(len(item)):
-            if index not in  indexes:
-                row.append(item[index])
-        new_table.append(row)
-        row = []
-    return new_table
-
-
-def superStrip(table):
-    for i in range(len(table)):
-        for j in range(len(table[i])):
-            if type(table[i][j]) == list:
-                for k in range(len(table[i][j])):
-                    table[i][j][k].strip(' ')
-                    table[i][j][k].strip('[')
-                    table[i][j][k].strip(']')
-                    table[i][j][k].strip('"')
-                    table[i][j][k].strip("'")
 
 
 #reads a csv file of the given name into a list
@@ -110,19 +86,7 @@ def writeTable(filename, table):
     
     outfile.close()
 	
-#counts occurrences base on a attribute filter
-def counter(data, column, filt, ignoreHeader):
-    count = 0
-    for row in data:
-        if(filt is not None):
-            if(row[column]==filt):
-                count += 1
-        else:
-            count += 1
-    if(ignoreHeader and count>0):
-        count -= 1
-    return count
-	
+
 # @Gina's repo
 def getColumn(table, column_index):
     column = []
@@ -249,17 +213,12 @@ def build_confusion_matrix(predictions_w_actual, headers, classes, strClassFlg=F
             calue_matrix[i][0] = str_classes[calue_matrix[i][0]-1]
     return(tabulate.tabulate(calue_matrix, headers))
 
-
-#@Gina's repo
-def bootstrap(table):
-    n = len(table)
-    sample = []
-    for _ in range(n):
-        rand_index = random.randrange(0, n)
-        sample.append(table[rand_index])
-
-    return sample
-
+#Generate random index sub set
+#@gina's repo
+def rand_attributes(value_list, num_values):
+    shuffled = value_list[:]
+    random.shuffle(shuffled)
+    return shuffled[:num_values]
 
 #compute majority vote
 def majority_vote(votes):
@@ -279,5 +238,93 @@ def majority_vote(votes):
             prime = 1
     return mode
 
+#@Gina's repo
+def bootstrap(table):
+    n = len(table)
+    sample = []
+    for _ in range(n):
+        rand_index = random.randrange(0, n)
+        sample.append(table[rand_index])
+
+    return sample
 
 
+#Converts raw values into categories
+def discrimatize(table, column_index, cut_offs):
+    for i in range(len(table)):
+        for j in range(len(cut_offs)):
+            if(j<(len(cut_offs)-1)):
+                if(table[i][column_index]<=cut_offs[j]):
+                    table[i][column_index] = j+1
+                    break
+            else:
+                table[i][column_index] = j+1
+    return table
+
+
+#plot accuracies by minute
+def plot(accuracies, figname):
+    minute = getColumn(accuracies, 0)
+    accuracy = getColumn(accuracies, 1)
+    plt.figure()
+    plt.scatter(minute, accuracy)
+    plt.title("TDIDT Accuracy Vs. Time")
+    plt.xlabel('Minute')
+    plt.ylabel('Accuracy')
+    plt.savefig(figname)
+
+#partition dataset based on an attribute
+def partition_instances(instances, att_index, att_domain):
+    # this is a group by att_domain, not by att_values in instances
+    partition = {}
+    for att_value in att_domain:
+        subinstances = []
+        for instance in instances:
+            # check if this instance has att_value at att_index
+            if instance[att_index] == att_value:
+                subinstances.append(instance)
+        partition[att_value] = subinstances
+    return partition
+
+#checks if instances have the same attribute value
+def check_all_same_att(instances, index):
+    base = instances[0][index]
+    for elem in instances:
+        if elem[index] != base:
+            return False
+    return True
+
+#checks if instances are all the same class
+def check_all_same_class(instances, class_index):
+    base = instances[0][class_index]
+    for elem in instances:
+        if elem[class_index] != base:
+            return False
+    return True
+
+#attribute selection with entropy 
+def select_attribute(instances, att_indexes, class_index):
+    Entropy_list = {}
+    for index in att_indexes:
+        E_new = 0
+        names, values = groupBy(instances, index)
+        for val in values:
+            ratios = {}
+            total = 0
+            for instance in val:
+                if instance[class_index] not in ratios:
+                    ratios[instance[class_index]] = 1
+                else:
+                    ratios[instance[class_index]] += 1
+                total += 1
+            E = 0
+            for ratio in ratios:
+                E += (ratios[ratio] / total) * math.log((ratios[ratio] / total), 2)
+            E_new += (total / len(instances)) * -E
+        Entropy_list[index] = E_new
+
+    min_i = att_indexes[0]
+    for index in att_indexes:
+        if Entropy_list[index] < Entropy_list[min_i]:
+            min_i = index
+    return min_i
