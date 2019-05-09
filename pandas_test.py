@@ -80,6 +80,11 @@ for index, row in data.iterrows():
         for herald in b_heralds:
             if float(herald[0]) <= i:
                 b_herald_total += 1
+                if b_herald_total ==3:
+                    print(b_heralds)
+                    print(line[2])
+                    print(line[1])
+                    print(line[0])
         minute.append(b_herald_total)
 
         r_kill_total = 0
@@ -116,6 +121,11 @@ for index, row in data.iterrows():
         for herald in r_heralds:
             if float(herald[0]) <= i:
                 r_herald_total += 1
+                if r_herald_total == 3:
+                    print(r_heralds)
+                    print(line[2])
+                    print(line[1])
+                    print(line[0])
         minute.append(r_herald_total)
 
         data_cleaned.append(minute)
