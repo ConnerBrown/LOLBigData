@@ -95,7 +95,12 @@ def prune(tree, confidence):
         else:
             pruned = False
             for i in range(len(tree[2:])):
-                pruned_n, tree[i+2][2] = prune(tree[i+2][2], confidence)
+                a = prune(tree[i+2][2], confidence)
+                if a == None:
+                    continue
+                else:
+                    pruned_n= a[0]
+                    tree[i+2][2] = a[1]
                 pruned = pruned or pruned_n
             if pruned:
                 return False, tree
@@ -231,7 +236,7 @@ def train_test_tree(tree, train, test, att_indexes, att_domains, class_index):
 
 def main():
     print('reading table')
-    table = utils.readTable("LoL_clean.csv")
+    table = utils.readTable("LoL_clean_manual.csv")
     #remove header
     table = table[1:]
     print('converting table numeric')
@@ -254,21 +259,19 @@ def main():
     cut_offs = [0, 1, 2]
     table = discrimatize(table, 21, cut_offs)
     table = discrimatize(table, 27, cut_offs)
-    cut_offs = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100]
-    table = discrimatize(table, 1, cut_offs)
-    print('Shuffling')
+    print('Shuffling and Reducing')
     random.shuffle(table)
-
+    table = table[0:int(len(table)/1.5)]
     print('     Instances: ', len(table))
     print('Stratisfying')
 
-    bins = utils.stratifiedCrossValidationBins(5, table, 1)
+    bins = utils.stratifiedCrossValidationBins(3, table, 1)
     train1, test1 = utils.binsToSets(bins, 0)
     print('Building tree with ', len(train1), ' instances')
-    att_indexes = [1, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+    att_indexes = [17, 18, 19, 20, 21, 22, 23, 24, 25,
                     26, 27, 28]
     domains = {
-                1: [x+1 for x in range(11)],
+                1: [x+1 for x in range(76)],
                 16: [1,2,3,4,5,6,7,8,9,10,11], 
                 17: [x+1 for x in range(7)],
                 18: [1,2,3,4,5],
@@ -311,7 +314,7 @@ def main():
     accuracies.sort(key=lambda x: x[0])
     count = 0
     for item in accuracies:
-        print('Minute: ', item[0]*5)
+        print('Minute: ', item[0])
         print('     Accuracy: ', item[1])
         print('     Correct: ', item[2])
         print('     Instances: ', item[3])
@@ -327,9 +330,9 @@ def main():
     for instance in train1:
         update_count(tree, instance, 5)
     
-    update_errors(tree, 0.7)
+    update_errors(tree, 0.8)
     print("     Pruning")
-    prune(tree, 0.7) 
+    prune(tree, 0.8) 
     print("Pruned Tree: ")
     pprint.pprint(tree)
 
@@ -357,7 +360,7 @@ def main():
     accuracies.sort(key=lambda x: x[0])
     count = 0
     for item in accuracies:
-        print('Minute: ', item[0]*5)
+        print('Minute: ', item[0])
         print('     Accuracy: ', item[1])
         print('     Correct: ', item[2])
         print('     Instances: ', item[3])

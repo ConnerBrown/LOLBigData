@@ -51,7 +51,7 @@ def KNN(training, K, testing, indexes, classIndex):
 
 def main():
     print('reading table')
-    table = utils.readTable("LoL_clean.csv")
+    table = utils.readTable("LoL_clean_manual.csv")
     #remove header
     table = table[1:]
     print('converting columns to numeric')
