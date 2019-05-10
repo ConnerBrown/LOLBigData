@@ -163,8 +163,8 @@ def main():
                 }
 
     print('Generating Random Forest this will take some time')
-    print('N = ', 30, " M = ", 7, " F = ", 2)
-    accuracies = random_forest(30, 7, 2, table, att_indexes, domains, 5, 1)
+    print('N = ', 25, " M = ", 5, " F = ", 4)
+    accuracies = random_forest(25, 5, 4, table, att_indexes, domains, 5, 1)
     #utils.plot(accuracies, "randomforestaccuracies.png")
 
     
