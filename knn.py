@@ -69,12 +69,6 @@ def main():
     utils.convertColToInt(table, 1, False)
     #make histogram
     minutes = utils.getColumn(table, 1)
-    plt.figure()
-    plt.hist(minutes, bins=max(minutes), histtype='step')
-    plt.title("Minute Histogram")
-    plt.xlabel("Minute")
-    plt.ylabel("Games")
-    plt.savefig("minutes_histogram.png")
     print('Normalizing gold diff and minute')
     utils.normalizeColumns(table, [1, 16])
     print('Shuffling and reducing')

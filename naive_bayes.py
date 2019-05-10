@@ -114,8 +114,6 @@ def main():
     print("Instances: ", total_instance)
     print("Correct: ", overall_correct)
 
-    plot(accuracies)
-
     
 
 
