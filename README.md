@@ -1,2 +1,2 @@
 # LOLBigData
-Finak Project for Data Mining
+Final Project for Data Mining
